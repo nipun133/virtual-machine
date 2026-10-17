@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Virtual Machine Console | Codespace Controller</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-glow glow-1"></div>
+  <div class="background-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+        </div>
+        <div>
+          <h1>VM Controller</h1>
+          <p class="brand-subtitle">GitHub Codespaces Virtual Machine</p>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <div class="telemetry-badge" title="No browser caching or local storage">
+          <span class="badge-dot dot-cyan"></span>
+          <span>Zero-Cache: Active</span>
+        </div>
+        <button id="refresh-btn" class="icon-button" title="Force Immediate GitHub API Refresh">
+          <svg id="refresh-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          <span class="refresh-label">Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Card -->
+    <main class="dashboard-grid">
+      <!-- Primary Power Card -->
+      <section class="card power-card">
+        <div class="card-header">
+          <div class="vm-identity">
+            <span class="repo-tag" id="vm-repo">nipun133/virtual-machine</span>
+            <h2 id="vm-display-name">virtual-machine</h2>
+            <code class="vm-id" id="vm-name">virtual-machine-jj4pr6jq7jw93475</code>
+          </div>
+
+          <!-- Live Status Badge -->
+          <div id="status-pill" class="status-pill status-loading">
+            <span class="status-indicator"></span>
+            <span id="status-text" class="status-text">CONNECTING...</span>
+          </div>
+        </div>
+
+        <!-- Big Power Toggle Centerpiece -->
+        <div class="power-control-zone">
+          <div class="power-switch-container">
+            <button id="power-toggle-btn" class="power-button" disabled title="Toggle Virtual Machine Power">
+              <div class="power-ring"></div>
+              <svg class="power-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                <line x1="12" y1="2" x2="12" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+
+          <div class="power-state-label">
+            <div id="power-action-text" class="action-caption">Checking VM Status...</div>
+            <div id="power-subtext" class="action-subtext">Zero cached data • Direct GitHub sync</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Row -->
+        <div class="card-actions">
+          <a id="connect-ide-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-disabled">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span>Launch Web IDE</span>
+          </a>
+          <button id="ssh-info-btn" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <span>SSH Command</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Hardware & Telemetry Card -->
+      <section class="card telemetry-card">
+        <h3 class="card-title">VM Hardware & Specs</h3>
+        
+        <div class="spec-grid">
+          <div class="spec-item">
+            <div class="spec-label">CPU Cores</div>
+            <div class="spec-value" id="spec-cpu">2 vCPU</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Memory</div>
+            <div class="spec-value" id="spec-ram">8 GB RAM</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Storage</div>
+            <div class="spec-value" id="spec-disk">32 GB SSD</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Region</div>
+            <div class="spec-value" id="spec-region">Central India</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">Idle Timeout</div>
+            <div class="spec-value spec-highlight" id="spec-timeout">240 min (4h)</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">API Latency</div>
+            <div class="spec-value spec-latency" id="spec-latency">-- ms</div>
+          </div>
+        </div>
+
+        <div class="audit-info">
+          <div class="audit-row">
+            <span>Freshness Verification:</span>
+            <strong id="last-verified-clock">Just now</strong>
+          </div>
+          <div class="audit-row">
+            <span>Cache Policy:</span>
+            <strong class="text-cyan">no-store, max-age=0</strong>
+          </div>
+          <div class="audit-row">
+            <span>Local Storage:</span>
+            <strong class="text-emerald">0 bytes (Disabled)</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Event Activity Stream -->
+      <section class="card logs-card">
+        <div class="logs-header">
+          <h3 class="card-title">Live Activity Log</h3>
+          <span class="live-dot-pulse">● Live Stream</span>
+        </div>
+        <div class="terminal-container" id="terminal-logs">
+          <div class="log-entry">
+            <span class="log-time">[System]</span>
+            <span class="log-msg">Connecting to GitHub Codespace VM API directly...</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div>Codespace VM Controller • Managed via GitHub API</div>
+      <div>Zero client storage • Direct cloud telemetry</div>
+    </footer>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
