@@ -1,3 +1,7 @@
+// In-memory debounce lock for power operations
+const activeLocks = new Map();
+const COOLDOWN_MS = 2500;
+
 module.exports = async (req, res) => {
   // Enforce zero cache at HTTP server level
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
@@ -73,6 +77,30 @@ module.exports = async (req, res) => {
     return res.status(400).json({ success: false, error: 'Invalid action. Must be "start" or "stop".' });
   }
 
+  const now = Date.now();
+
+  // Edge Case: Debounce spamming on server side
+  const lock = activeLocks.get(name);
+  if (lock && (now - lock.time) < COOLDOWN_MS) {
+    return res.status(200).json({
+      success: true,
+      throttled: true,
+      name,
+      action: lock.action,
+      message: 'Operation in progress. Debouncing duplicate request.',
+      cooldownRemainingMs: COOLDOWN_MS - (now - lock.time),
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Set lock
+  activeLocks.set(name, { time: now, action });
+
+  // Clean old entries (>30s)
+  for (const [key, val] of activeLocks.entries()) {
+    if (now - val.time > 30000) activeLocks.delete(key);
+  }
+
   const startTime = Date.now();
   const timestamp = new Date().toISOString();
 
@@ -91,6 +119,20 @@ module.exports = async (req, res) => {
     });
 
     const latencyMs = Date.now() - startTime;
+
+    // Edge Case: 409 Conflict (e.g. machine already starting or stopping)
+    if (ghRes.status === 409) {
+      return res.status(200).json({
+        success: true,
+        conflict: true,
+        name,
+        action,
+        message: 'VM transition already initiated on GitHub.',
+        latencyMs,
+        timestamp,
+        cacheBypass: true
+      });
+    }
 
     if (!ghRes.ok) {
       const errorText = await ghRes.text();
