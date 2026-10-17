@@ -28,7 +28,6 @@ if [ ! -f "/usr/local/bin/antigravity-autostart.sh" ] && [ -f "/workspaces/virtu
     sudo chmod +x /usr/local/bin/antigravity-autostart.sh 2>/dev/null || true
 fi
 
-# Start or keep alive the agy-daemon tmux session
 mkdir -p /home/codespace/.gemini/antigravity-cli
 
 if ! tmux has-session -t agy-daemon 2>/dev/null; then
@@ -40,6 +39,14 @@ if ! tmux has-session -t agy-daemon 2>/dev/null; then
 
     echo "[$(date -u)] Starting single resilient agy remote-control supervisor..." >> /home/codespace/.gemini/antigravity-cli/autostart.log
     tmux new-session -d -s agy-daemon "bash -c 'while true; do agy remote-control serve; echo \"[\$(date -u)] Daemon exited with status \$?, restarting in 5s...\"; sleep 5; done'"
+    
+    # Warm up past trajectories and restore missing titles so sessions persist across restarts
+    if [ -f "/workspaces/virtual-machine/antigravity-restore-sessions.py" ]; then
+        (sleep 4 && python3 /workspaces/virtual-machine/antigravity-restore-sessions.py >> /home/codespace/.gemini/antigravity-cli/autostart.log 2>&1) &
+    fi
 else
     echo "[$(date -u)] agy-daemon session is already active." >> /home/codespace/.gemini/antigravity-cli/autostart.log
+    if [ -f "/workspaces/virtual-machine/antigravity-restore-sessions.py" ]; then
+        (python3 /workspaces/virtual-machine/antigravity-restore-sessions.py >> /home/codespace/.gemini/antigravity-cli/autostart.log 2>&1) &
+    fi
 fi
