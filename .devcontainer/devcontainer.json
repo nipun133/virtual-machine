@@ -1,0 +1,4 @@
+{
+  "name": "Virtual Machine",
+  "postStartCommand": "bash /workspaces/virtual-machine/antigravity-autostart.sh"
+}
