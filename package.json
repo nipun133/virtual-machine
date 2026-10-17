@@ -2,6 +2,5 @@
   "name": "virtual-machine-controller",
   "version": "1.0.0",
   "private": true,
-  "description": "Real-time zero-cache controller for GitHub Codespaces Virtual Machine",
-  "main": "api/status.js"
+  "description": "Real-time zero-cache controller for GitHub Codespaces Virtual Machine"
 }
