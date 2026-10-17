@@ -11,7 +11,6 @@ CONFIG_DIR = "/home/codespace/.gemini/antigravity-cli"
 PROJECTS_DIR = "/home/codespace/.gemini/config/projects"
 CLI_LOG = os.path.join(CONFIG_DIR, "cli.log")
 SUMMARIES_DB = os.path.join(CONFIG_DIR, "conversation_summaries.db")
-TOKEN_PATH = os.path.join(CONFIG_DIR, "antigravity-oauth-token")
 
 def ensure_project_configs():
     os.makedirs(PROJECTS_DIR, exist_ok=True)
@@ -44,16 +43,6 @@ def restore_titles_from_annotations():
     except Exception as e:
         print(f"Error updating summaries DB: {e}")
 
-def get_auth_token():
-    if os.path.exists(TOKEN_PATH):
-        try:
-            with open(TOKEN_PATH, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return data.get("token", {}).get("access_token")
-        except Exception:
-            pass
-    return None
-
 def get_http_port():
     for _ in range(30):
         if os.path.exists(CLI_LOG):
@@ -71,11 +60,7 @@ def get_http_port():
 def warm_resident_trajectories(port):
     conv_files = glob.glob(os.path.join(CONFIG_DIR, "conversations", "*.db"))
     print(f"Found {len(conv_files)} conversation databases to make resident...")
-    token = get_auth_token()
     headers = {"Content-Type": "application/json"}
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-        headers["X-Codeium-Api-Key"] = token
 
     for db_file in conv_files:
         cid = os.path.basename(db_file).replace(".db", "")
@@ -84,7 +69,7 @@ def warm_resident_trajectories(port):
         req = urllib.request.Request(url, data=payload, headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=5) as resp:
-                print(f"Loaded trajectory {cid}: {resp.status}")
+                print(f"Loaded trajectory {cid}: status={resp.status}")
         except Exception as e:
             print(f"Failed to load {cid}: {e}")
 
