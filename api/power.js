@@ -25,33 +25,48 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Parse body
-  let body = req.body;
-  if (typeof body === 'string') {
-    try {
-      body = JSON.parse(body);
-    } catch (e) {
-      body = {};
-    }
-  } else if (!body) {
-    // Collect stream chunks if not parsed
-    try {
-      const buffers = [];
-      for await (const chunk of req) {
-        buffers.push(chunk);
+  // Parse query params first for dual-redundancy
+  const parsedUrl = new URL(req.url, 'http://localhost');
+  let name = parsedUrl.searchParams.get('name') || req.query?.name;
+  let action = parsedUrl.searchParams.get('action') || req.query?.action;
+
+  // Try parsing request body if query params are missing
+  if (!name || !action) {
+    let rawBody = '';
+    if (req.body) {
+      if (typeof req.body === 'object') {
+        name = name || req.body.name;
+        action = action || req.body.action;
+      } else if (typeof req.body === 'string') {
+        try {
+          const parsed = JSON.parse(req.body);
+          name = name || parsed.name;
+          action = action || parsed.action;
+        } catch (e) {}
       }
-      const dataStr = Buffer.concat(buffers).toString();
-      body = dataStr ? JSON.parse(dataStr) : {};
-    } catch (e) {
-      body = {};
+    } else {
+      // Read stream
+      await new Promise((resolve) => {
+        req.on('data', chunk => { rawBody += chunk; });
+        req.on('end', () => {
+          try {
+            if (rawBody) {
+              const parsed = JSON.parse(rawBody);
+              name = name || parsed.name;
+              action = action || parsed.action;
+            }
+          } catch (e) {}
+          resolve();
+        });
+        req.on('error', () => resolve());
+      });
     }
   }
 
-  const name = body?.name;
-  const action = (body?.action || '').toLowerCase();
+  action = (action || '').toLowerCase().trim();
 
   if (!name) {
-    return res.status(400).json({ success: false, error: 'Missing "name" parameter in request body.' });
+    return res.status(400).json({ success: false, error: 'Missing "name" parameter in request.' });
   }
 
   if (action !== 'start' && action !== 'stop') {

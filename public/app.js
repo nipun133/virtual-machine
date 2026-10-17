@@ -226,7 +226,8 @@ async function togglePower() {
   logEvent(`Sent command: POWER ${action.toUpperCase()} for ${currentVm.name}`, 'warning');
 
   try {
-    const res = await fetchNoCache('/api/power', {
+    const powerUrl = `/api/power?name=${encodeURIComponent(currentVm.name)}&action=${action}`;
+    const res = await fetchNoCache(powerUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
