@@ -5,7 +5,6 @@ import os
 import re
 import sqlite3
 import time
-import urllib.request
 
 CONFIG_DIR = "/home/codespace/.gemini/antigravity-cli"
 PROJECTS_DIR = "/home/codespace/.gemini/config/projects"
@@ -43,42 +42,25 @@ def restore_titles_from_annotations():
     except Exception as e:
         print(f"Error updating summaries DB: {e}")
 
-def get_http_port():
-    for _ in range(30):
-        if os.path.exists(CLI_LOG):
-            try:
-                with open(CLI_LOG, "r", encoding="utf-8", errors="ignore") as f:
-                    text = f.read()
-                ports = re.findall(r"Language server listening on random port at (\d+) for HTTP", text)
-                if ports:
-                    return int(ports[-1])
-            except Exception:
-                pass
-        time.sleep(1)
-    return None
-
-def warm_resident_trajectories(port):
-    conv_files = glob.glob(os.path.join(CONFIG_DIR, "conversations", "*.db"))
-    print(f"Found {len(conv_files)} conversation databases to make resident...")
-    headers = {"Content-Type": "application/json"}
-
-    for db_file in conv_files:
-        cid = os.path.basename(db_file).replace(".db", "")
-        url = f"http://127.0.0.1:{port}/exa.language_server_pb.LanguageServerService/LoadTrajectory"
-        payload = json.dumps({"cascadeId": cid}).encode("utf-8")
-        req = urllib.request.Request(url, data=payload, headers=headers)
-        try:
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                print(f"Loaded trajectory {cid}: status={resp.status}")
-        except Exception as e:
-            print(f"Failed to load {cid}: {e}")
+def update_default_project_to_most_recent():
+    if not os.path.exists(SUMMARIES_DB):
+        return
+    try:
+        conn = sqlite3.connect(SUMMARIES_DB)
+        cur = conn.cursor()
+        cur.execute("SELECT project_id, conversation_id, workspace_uris FROM conversation_summaries WHERE project_id IS NOT NULL AND project_id != '' ORDER BY last_modified_time DESC LIMIT 1")
+        row = cur.fetchone()
+        conn.close()
+        if row and row[0]:
+            cache_dir = os.path.join(CONFIG_DIR, "cache")
+            os.makedirs(cache_dir, exist_ok=True)
+            with open(os.path.join(cache_dir, "default_project_id.txt"), "w") as f:
+                f.write(row[0].strip())
+            print(f"Updated default_project_id.txt to most recent project: {row[0]}")
+    except Exception as e:
+        print(f"Error updating default project: {e}")
 
 if __name__ == "__main__":
     ensure_project_configs()
     restore_titles_from_annotations()
-    port = get_http_port()
-    if port:
-        print(f"Antigravity HTTP RPC port detected: {port}")
-        warm_resident_trajectories(port)
-    else:
-        print("Could not detect active HTTP port from log.")
+    update_default_project_to_most_recent()
