@@ -32,7 +32,13 @@ fi
 mkdir -p /home/codespace/.gemini/antigravity-cli
 
 if ! tmux has-session -t agy-daemon 2>/dev/null; then
-    echo "[$(date -u)] Starting resilient agy remote-control supervisor..." >> /home/codespace/.gemini/antigravity-cli/autostart.log
+    # Kill any stray unattached background instances to avoid duplicate WebChannel sockets & SQLite locks
+    pkill -9 -f "agy remote-control serve" 2>/dev/null || true
+    pkill -9 -x agy 2>/dev/null || true
+    rm -f /home/codespace/.gemini/antigravity-cli/presence/*.lock 2>/dev/null || true
+    sleep 1
+
+    echo "[$(date -u)] Starting single resilient agy remote-control supervisor..." >> /home/codespace/.gemini/antigravity-cli/autostart.log
     tmux new-session -d -s agy-daemon "bash -c 'while true; do agy remote-control serve; echo \"[\$(date -u)] Daemon exited with status \$?, restarting in 5s...\"; sleep 5; done'"
 else
     echo "[$(date -u)] agy-daemon session is already active." >> /home/codespace/.gemini/antigravity-cli/autostart.log
