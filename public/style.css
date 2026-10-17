@@ -17,7 +17,7 @@
   --color-cyan: #06b6d4;
   --color-purple: #8b5cf6;
   
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
@@ -25,6 +25,13 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
 }
 
 body {
@@ -32,12 +39,12 @@ body {
   color: var(--text-main);
   font-family: var(--font-sans);
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
-  overflow-x: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 24px 16px;
 }
 
 /* Ambient glow blobs */
@@ -47,7 +54,7 @@ body {
   filter: blur(120px);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.45;
+  opacity: 0.4;
 }
 
 .glow-1 {
@@ -73,7 +80,7 @@ body {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 /* Header */
@@ -81,18 +88,21 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 8px;
+  padding-bottom: 4px;
+  gap: 12px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .brand-icon {
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   border-radius: 12px;
   background: linear-gradient(135deg, #1e293b, #0f172a);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -104,20 +114,25 @@ body {
 }
 
 .brand h1 {
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .brand-subtitle {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .header-badges {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .telemetry-badge {
@@ -131,12 +146,18 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   color: #38bdf8;
+  white-space: nowrap;
+}
+
+.badge-text-mobile {
+  display: none;
 }
 
 .badge-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .dot-cyan {
@@ -151,18 +172,24 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-card);
   color: var(--text-muted);
-  padding: 7px 14px;
+  padding: 7px 12px;
   border-radius: 10px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
+  touch-action: manipulation;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .icon-button:hover {
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-main);
   border-color: var(--border-card-hover);
+}
+
+.icon-button:active {
+  transform: scale(0.96);
 }
 
 .spinning {
@@ -178,12 +205,7 @@ body {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 20px;
-}
-
-@media (max-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
+  width: 100%;
 }
 
 /* Card General */
@@ -196,6 +218,7 @@ body {
   padding: 24px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   transition: border-color 0.2s ease;
+  overflow: hidden;
 }
 
 .card:hover {
@@ -203,12 +226,12 @@ body {
 }
 
 .card-title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* Power Card */
@@ -216,42 +239,46 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 24px;
+  gap: 22px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: 12px;
 }
 
 .vm-identity {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .repo-tag {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.1);
   padding: 2px 8px;
   border-radius: 6px;
   width: fit-content;
+  white-space: nowrap;
 }
 
 .vm-identity h2 {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  word-break: break-word;
 }
 
 .vm-id {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--text-dim);
+  word-break: break-all;
 }
 
 /* Status Pill */
@@ -261,10 +288,12 @@ body {
   gap: 8px;
   padding: 6px 14px;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .status-indicator {
@@ -272,6 +301,7 @@ body {
   height: 10px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 /* Status states */
@@ -351,7 +381,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 0;
+  padding: 26px 0;
   gap: 18px;
 }
 
@@ -370,12 +400,17 @@ body {
   background: linear-gradient(145deg, #182032, #0d121d);
   color: var(--text-dim);
   cursor: pointer;
+  touch-action: manipulation;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.08);
+}
+
+.power-button:active {
+  transform: scale(0.96);
 }
 
 .power-ring {
@@ -407,6 +442,9 @@ body {
   color: #38bdf8;
   box-shadow: 0 0 30px rgba(56, 189, 248, 0.3), 0 10px 25px rgba(0, 0, 0, 0.8);
 }
+.power-button.btn-is-offline:active {
+  transform: scale(0.96);
+}
 .power-button.btn-is-offline:hover .power-ring {
   border-color: rgba(56, 189, 248, 0.5);
 }
@@ -430,6 +468,7 @@ body {
 
 .power-state-label {
   text-align: center;
+  padding: 0 8px;
 }
 
 .action-caption {
@@ -439,7 +478,7 @@ body {
 }
 
 .action-subtext {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-dim);
   margin-top: 4px;
 }
@@ -448,6 +487,7 @@ body {
 .card-actions {
   display: flex;
   gap: 12px;
+  width: 100%;
 }
 
 .btn {
@@ -457,13 +497,20 @@ body {
   justify-content: center;
   gap: 8px;
   padding: 12px 18px;
+  min-height: 44px;
   border-radius: 12px;
   font-weight: 600;
   font-size: 0.88rem;
   cursor: pointer;
+  touch-action: manipulation;
   text-decoration: none;
   transition: all 0.2s ease;
   border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 .btn-primary {
@@ -505,7 +552,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .spec-item {
@@ -516,7 +563,7 @@ body {
 }
 
 .spec-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -525,7 +572,7 @@ body {
 }
 
 .spec-value {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
   font-family: var(--font-mono);
   color: var(--text-main);
@@ -547,7 +594,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
 .audit-row {
@@ -555,6 +602,11 @@ body {
   justify-content: space-between;
   align-items: center;
   color: var(--text-muted);
+  gap: 8px;
+}
+
+.audit-row strong {
+  white-space: nowrap;
 }
 
 .text-cyan { color: #38bdf8; }
@@ -572,7 +624,7 @@ body {
 }
 
 .live-dot-pulse {
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 600;
   color: var(--color-green);
   animation: pulse-live 1.5s infinite;
@@ -588,18 +640,19 @@ body {
   background: #04060a;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 14px;
+  padding: 12px 14px;
   height: 140px;
   overflow-y: auto;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  word-break: break-word;
 }
 
 .terminal-container::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 .terminal-container::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
@@ -608,17 +661,19 @@ body {
 
 .log-entry {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   line-height: 1.4;
 }
 
 .log-time {
   color: var(--text-dim);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .log-msg {
   color: #cbd5e1;
+  word-break: break-word;
 }
 
 .log-success { color: #34d399; }
@@ -630,7 +685,246 @@ body {
 .app-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: var(--text-dim);
   padding: 0 4px;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints: Mobile Screen Optimization
+   ========================================================================== */
+
+/* Tablets and small laptops */
+@media (max-width: 768px) {
+  body {
+    padding: 20px 14px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .glow-1, .glow-2 {
+    width: 320px;
+    height: 320px;
+    filter: blur(90px);
+  }
+}
+
+/* Standard Mobile Screens (iPhone 12/13/14/15/Pro, Samsung Galaxy, Pixel) */
+@media (max-width: 600px) {
+  body {
+    padding: 12px 12px max(18px, env(safe-area-inset-bottom));
+    align-items: flex-start;
+  }
+
+  .app-container {
+    gap: 14px;
+  }
+
+  /* Compact Header */
+  .app-header {
+    padding-bottom: 2px;
+  }
+
+  .brand {
+    gap: 10px;
+  }
+
+  .brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .brand-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .brand h1 {
+    font-size: 1.12rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.7rem;
+  }
+
+  .header-badges {
+    gap: 8px;
+  }
+
+  .telemetry-badge {
+    padding: 5px 9px;
+    font-size: 0.68rem;
+  }
+
+  .badge-text-full {
+    display: none;
+  }
+
+  .badge-text-mobile {
+    display: inline;
+  }
+
+  .icon-button {
+    padding: 6px 10px;
+    font-size: 0.74rem;
+    border-radius: 8px;
+  }
+
+  .refresh-label {
+    display: none;
+  }
+
+  /* Cards */
+  .card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  /* Power Card Responsive */
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .status-pill {
+    align-self: flex-start;
+    padding: 5px 12px;
+    font-size: 0.7rem;
+  }
+
+  .vm-identity h2 {
+    font-size: 1.2rem;
+  }
+
+  .vm-id {
+    font-size: 0.68rem;
+  }
+
+  /* Power Switch scaled for touch */
+  .power-control-zone {
+    padding: 16px 0;
+    gap: 14px;
+  }
+
+  .power-button {
+    width: 120px;
+    height: 120px;
+  }
+
+  .power-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .action-caption {
+    font-size: 1.05rem;
+  }
+
+  .action-subtext {
+    font-size: 0.74rem;
+  }
+
+  /* Action Buttons stacked vertically on mobile for massive thumb hit targets */
+  .card-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn {
+    width: 100%;
+    min-height: 46px;
+    font-size: 0.85rem;
+  }
+
+  /* Telemetry Specs */
+  .spec-grid {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .spec-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .spec-label {
+    font-size: 0.66rem;
+  }
+
+  .spec-value {
+    font-size: 0.86rem;
+  }
+
+  .audit-info {
+    padding: 12px;
+    font-size: 0.74rem;
+    gap: 6px;
+  }
+
+  /* Terminal Log */
+  .terminal-container {
+    height: 115px;
+    font-size: 0.72rem;
+    padding: 10px 12px;
+  }
+
+  .log-entry {
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+
+  .log-time {
+    font-size: 0.66rem;
+  }
+
+  /* Footer */
+  .app-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Extra Small Mobile Screens (iPhone SE, Galaxy Fold, sub-375px) */
+@media (max-width: 380px) {
+  body {
+    padding: 10px 8px max(14px, env(safe-area-inset-bottom));
+  }
+
+  .card {
+    padding: 14px 12px;
+    border-radius: 14px;
+  }
+
+  .brand h1 {
+    font-size: 1rem;
+  }
+
+  .power-button {
+    width: 105px;
+    height: 105px;
+  }
+
+  .power-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .action-caption {
+    font-size: 0.95rem;
+  }
+
+  .spec-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
 }
