@@ -30,6 +30,7 @@ fi
 
 mkdir -p /home/codespace/.gemini/antigravity-cli
 
+# Start or keep alive the agy-daemon tmux session
 if ! tmux has-session -t agy-daemon 2>/dev/null; then
     # Kill any stray unattached background instances to avoid duplicate WebChannel sockets & SQLite locks
     pkill -9 -f "agy remote-control serve" 2>/dev/null || true
@@ -39,14 +40,10 @@ if ! tmux has-session -t agy-daemon 2>/dev/null; then
 
     echo "[$(date -u)] Starting single resilient agy remote-control supervisor..." >> /home/codespace/.gemini/antigravity-cli/autostart.log
     tmux new-session -d -s agy-daemon "bash -c 'while true; do agy remote-control serve; echo \"[\$(date -u)] Daemon exited with status \$?, restarting in 5s...\"; sleep 5; done'"
-    
-    # Warm up past trajectories and restore missing titles so sessions persist across restarts
-    if [ -f "/workspaces/virtual-machine/antigravity-restore-sessions.py" ]; then
-        (sleep 4 && python3 /workspaces/virtual-machine/antigravity-restore-sessions.py >> /home/codespace/.gemini/antigravity-cli/autostart.log 2>&1) &
-    fi
-else
-    echo "[$(date -u)] agy-daemon session is already active." >> /home/codespace/.gemini/antigravity-cli/autostart.log
-    if [ -f "/workspaces/virtual-machine/antigravity-restore-sessions.py" ]; then
-        (python3 /workspaces/virtual-machine/antigravity-restore-sessions.py >> /home/codespace/.gemini/antigravity-cli/autostart.log 2>&1) &
-    fi
+fi
+
+# Start continuous metadata watcher if not already running
+if ! pgrep -f "antigravity-restore-sessions.py --daemon" >/dev/null 2>&1; then
+    nohup python3 /workspaces/virtual-machine/antigravity-restore-sessions.py --daemon >> /home/codespace/.gemini/antigravity-cli/metadata-watcher.log 2>&1 &
+    echo "[$(date -u)] Started continuous metadata watcher." >> /home/codespace/.gemini/antigravity-cli/autostart.log
 fi
