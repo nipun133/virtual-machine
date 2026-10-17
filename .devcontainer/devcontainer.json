@@ -1,4 +1,5 @@
 {
   "name": "Virtual Machine",
+  "postCreateCommand": "sudo apt-get update -y && sudo apt-get install -y tmux",
   "postStartCommand": "bash /workspaces/virtual-machine/antigravity-autostart.sh"
 }
