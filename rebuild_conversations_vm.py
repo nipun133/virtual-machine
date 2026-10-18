@@ -189,7 +189,7 @@ def main():
 
         cur.execute("""
             UPDATE conversation_summaries
-            SET title = ?, source = 'CORTEX_TRAJECTORY_SOURCE_JETBOX'
+            SET title = ?, source = 'CORTEX_TRAJECTORY_SOURCE_JETBOX', project_id = 'default-cli-project'
             WHERE conversation_id = ?
         """, (title, cid))
         if cur.rowcount > 0:
