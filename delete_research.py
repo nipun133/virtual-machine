@@ -12,50 +12,52 @@ CONV_DIR = os.path.join(CONFIG_DIR, "conversations")
 ANNOTATIONS_DIR = os.path.join(CONFIG_DIR, "annotations")
 BRAIN_DIR = os.path.join(CONFIG_DIR, "brain")
 DB_PATH = os.path.join(CONFIG_DIR, "conversation_summaries.db")
+JETBOX_PB = os.path.join(CONFIG_DIR, "jetbox_summaries_proto.pb")
+AGYHUB_PB = os.path.join(CONFIG_DIR, "agyhub_summaries_proto.pb")
+PROJECTS_DIR = os.path.expanduser("~/.gemini/config/projects")
 
-RESEARCH_CIDS = [
-    "3fe36fa0-a78e-451b-9e10-5e9baa23a654",
-    "b8e90531-9de4-404f-a5e3-08e1747b29be",
-    "de7d7421-2e26-4ec3-af1a-03f075e1b36e"
-]
+# Remove Research project json
+for pf in glob.glob(os.path.join(PROJECTS_DIR, "*c3061d7b*.json")):
+    try:
+        os.remove(pf)
+        print(f"[Delete] Removed project definition: {pf}")
+    except Exception as e:
+        print(f"Error removing {pf}: {e}")
 
-print("[Delete] Removing Research conversation files...")
-for cid in RESEARCH_CIDS:
-    # 1. Delete conversation files
-    for f in glob.glob(os.path.join(CONV_DIR, f"{cid}*")):
-        try:
-            os.remove(f)
-            print(f"  Deleted conversation file: {os.path.basename(f)}")
-        except Exception as e:
-            print(f"  Error removing {f}: {e}")
+# Delete conversation files referencing research
+for p in [CONV_DIR, ANNOTATIONS_DIR, BRAIN_DIR]:
+    for target in ["3fe36fa0*", "b8e90531*", "de7d7421*", "7953b71c*", "462e8d30*"]:
+        for match in glob.glob(os.path.join(p, target)):
+            try:
+                if os.path.isdir(match):
+                    shutil.rmtree(match)
+                else:
+                    os.remove(match)
+                print(f"[Delete] Removed {match}")
+            except Exception as e:
+                print(f"Error removing {match}: {e}")
 
-    # 2. Delete annotations
-    for f in glob.glob(os.path.join(ANNOTATIONS_DIR, f"{cid}*")):
-        try:
-            os.remove(f)
-            print(f"  Deleted annotation: {os.path.basename(f)}")
-        except Exception as e:
-            print(f"  Error removing {f}: {e}")
-
-    # 3. Delete brain folder
-    brain_path = os.path.join(BRAIN_DIR, cid)
-    if os.path.exists(brain_path):
-        try:
-            shutil.rmtree(brain_path)
-            print(f"  Deleted brain folder: {cid}")
-        except Exception as e:
-            print(f"  Error removing brain {cid}: {e}")
-
-# 4. Remove from conversation_summaries.db
+# Clean SQLite DB to match only remaining existing .db files
 if os.path.exists(DB_PATH):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    for cid in RESEARCH_CIDS:
-        cur.execute("DELETE FROM conversation_summaries WHERE conversation_id = ?", (cid,))
-    cur.execute("DELETE FROM conversation_summaries WHERE workspace_uris LIKE '%Research%'")
+    existing_cids = [os.path.basename(f)[:-3] for f in glob.glob(os.path.join(CONV_DIR, "*.db"))]
+    if existing_cids:
+        placeholders = ",".join("?" for _ in existing_cids)
+        cur.execute(f"DELETE FROM conversation_summaries WHERE conversation_id NOT IN ({placeholders})", existing_cids)
     cur.execute("DELETE FROM conversation_summaries WHERE project_id = 'c3061d7b-ed93-4bd9-920c-f93b7bc6fce3'")
+    cur.execute("DELETE FROM conversation_summaries WHERE workspace_uris LIKE '%Research%'")
     conn.commit()
     conn.close()
-    print("[Delete] Removed Research entries from conversation_summaries.db")
+    print(f"[Delete] Database pruned to match remaining conversations: {existing_cids}")
 
-print("[Delete] Research project and conversations wiped successfully.")
+# Remove old protobuf stores so agy regenerates clean ones
+for pb in [JETBOX_PB, AGYHUB_PB]:
+    if os.path.exists(pb):
+        try:
+            os.remove(pb)
+            print(f"[Delete] Removed {pb}")
+        except Exception as e:
+            print(f"Error removing {pb}: {e}")
+
+print("[Delete] All Research files and projects completely wiped.")
