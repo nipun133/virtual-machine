@@ -192,6 +192,24 @@ def main():
             reconciled += 1
             print(f"  [+] Restored title for {cid[:8]}: {title}")
 
+        # Also write/update annotations/<cid>.pbtxt so agy's internal reconciler natively preserves it!
+        annotations_dir = os.path.join(GEMINI_CLI_DIR, "annotations")
+        os.makedirs(annotations_dir, exist_ok=True)
+        pbtxt_path = os.path.join(annotations_dir, f"{cid}.pbtxt")
+        try:
+            content = ""
+            if os.path.exists(pbtxt_path):
+                with open(pbtxt_path, "r", encoding="utf-8") as pf:
+                    content = pf.read()
+            if 'title:' in content:
+                new_content = re.sub(r'title:\s*"[^"]*"', f'title:"{title}"', content)
+            else:
+                new_content = f'title:"{title}"\n' + content
+            with open(pbtxt_path, "w", encoding="utf-8") as pf:
+                pf.write(new_content)
+        except Exception as pe:
+            print(f"  [-] Warning writing annotation: {pe}")
+
     conn.commit()
     conn.close()
     print(f"[Rebuild] Completed. Restored {reconciled} conversation summaries.")
