@@ -119,8 +119,12 @@ def extract_prompt_from_conversation_db(db_path):
 def format_title(prompt):
     if not prompt:
         return None
-    # Strip XML tags like <USER_REQUEST>, </USER_REQUEST>, <ADDITIONAL_METADATA>
-    text = re.sub(r'<[^>]+>', ' ', prompt)
+    # If structured prompt contains <USER_REQUEST>, extract the actual user content
+    m = re.search(r'<USER_REQUEST>\s*(.*?)\s*</USER_REQUEST>', prompt, re.DOTALL)
+    if m:
+        text = m.group(1)
+    else:
+        text = re.sub(r'<[^>]+>', ' ', prompt)
     # Clean URLs and whitespace
     text = re.sub(r'https?://\S+', '', text).strip()
     words = text.split()
