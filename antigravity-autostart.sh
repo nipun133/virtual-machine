@@ -39,7 +39,8 @@ if ! tmux has-session -t agy-daemon 2>/dev/null; then
     sleep 1
 
     echo "[$(date -u)] Starting single resilient agy remote-control supervisor..." >> /home/codespace/.gemini/antigravity-cli/autostart.log
-    tmux new-session -d -s agy-daemon "bash -c 'while true; do agy remote-control serve; echo \"[\$(date -u)] Daemon exited with status \$?, restarting in 5s...\"; sleep 5; done'"
+    python3 /workspaces/virtual-machine/rebuild_conversations_vm.py 2>&1 || true
+    tmux new-session -d -s agy-daemon "bash -c 'while true; do python3 /workspaces/virtual-machine/rebuild_conversations_vm.py 2>&1 || true; agy remote-control serve; echo \"[\$(date -u)] Daemon exited with status \$?, restarting in 5s...\"; sleep 5; done'"
 else
     echo "[$(date -u)] agy-daemon session is already active." >> /home/codespace/.gemini/antigravity-cli/autostart.log
 fi
